@@ -5,6 +5,13 @@ import torchvision.transforms.functional as TF
 from PIL import Image
 import torchvision.models as models
 
+
+import os
+
+if os.path.exists("requirements.txt"):
+    os.system("pip install -r requirements.txt")
+
+
 # 定义 CIFAR-10 数据集的类别名称
 class_names = ['飞机', '汽车', '鸟', '猫', '鹿',
                '狗', '青蛙', '马', '船', '卡车']
