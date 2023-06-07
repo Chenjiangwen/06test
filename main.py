@@ -1,90 +1,58 @@
-# 这是一个示例 Python 脚本。
-
-# 按 Shift+F10 执行或将其替换为您的代码。
-# 按 双击 Shift 在所有地方搜索类、文件、工具窗口、操作和设置。
-
 import streamlit as st
 import torch
-import torchvision.models as models
-import torchvision.transforms as transforms
+import torch.nn as nn
+import torchvision.transforms.functional as TF
 from PIL import Image
-from torch import nn
-# 加载 ResNet 模型
-model = models.resnet18(pretrained=True)
-model.eval()
+import torchvision.models as models
 
-PATH = 'data\cifar_net.pth'
-# 设置类别名称映射表
-# 定义 CIFAR-10 中各个类别的名称
+# 定义 CIFAR-10 数据集的类别名称
 class_names = ['飞机', '汽车', '鸟', '猫', '鹿',
                '狗', '青蛙', '马', '船', '卡车']
 
-# name2label = {label_name: i for i, label_name in enumerate(label_names)}  # 将类别名称映射为类别索引
-net = models.resnet18(pretrained=False)
+# 载入预训练的 ResNet-18 模型
+net = models.resnet18(pretrained=True)
 num_ftrs = net.fc.in_features
 net.fc = nn.Linear(num_ftrs, 10)
 device = torch.device("cpu")
+# PATH = 'cifar_net.pth'
+PATH = 'data/cifar_net.pth'
 net.load_state_dict(torch.load(PATH))
 net.eval()
 net.to(device)
 
-from PIL import Image
-import torchvision.transforms.functional as TF
+# 创建函数来预测输入图像的标签
+def predict(images):
+    predicted_labels = []
+    for image in images:
+        img = Image.open(image)
+        img = TF.resize(img, (224, 224))
+        img = TF.to_tensor(img)
+        img = TF.normalize(img, mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+        with torch.no_grad():
+            img = img.unsqueeze(0)
+            img = img.to(device)
+            outputs = net(img)
+            _, predicted = torch.max(outputs.data, 1)
+            predicted_label = class_names[predicted[0]]
+            predicted_labels.append(predicted_label)
+    return predicted_labels
 
+# 创建 Streamlit 应用
+# 创建 Streamlit 应用
+st.title("图像分类应用")
+st.write("上传图片，我们将尝试预测它们的类别！")
+num_images = st.select_slider('选择要上传的图片数量：', options=[1, 2, 3])
 
+uploaded_files = st.file_uploader(f"选择 {num_images} 张图片...", accept_multiple_files=True)
 
-# # 定义用于处理图像的转换器
-# transform = transforms.Compose([
-#     transforms.Resize(256),
-#     transforms.CenterCrop(224),
-#     transforms.ToTensor(),
-#     transforms.Normalize(
-#         mean=[0.485, 0.456, 0.406],
-#         std=[0.229, 0.224, 0.225]
-#     )
-# ])
-
-col1, col2, col3 = st.columns(3)
-
-uploaded_files = []
-
-# 显示三个 file uploader，并将其加载到 uploaded_files 列表中
-with col1:
-    uploaded_file1 = st.file_uploader('Choose an image file 1', type=['jpg', 'jpeg', 'png'])
-    if uploaded_file1 is not None:
-        uploaded_files.append(uploaded_file1)
-
-with col2:
-    uploaded_file2 = st.file_uploader('Choose an image file 2', type=['jpg', 'jpeg', 'png'])
-    if uploaded_file2 is not None:
-        uploaded_files.append(uploaded_file2)
-
-with col3:
-    uploaded_file3 = st.file_uploader('Choose an image file 3', type=['jpg', 'jpeg', 'png'])
-    if uploaded_file3 is not None:
-        uploaded_files.append(uploaded_file3)
-
-# 对每个已上传的文件进行分类并显示结果
-for uploaded_file in uploaded_files:
-    # 将上传的图像转换为 PyTorch 所需的张量形式
-    img = Image.open(uploaded_file).convert('RGB')
-    img_tensor = TF.to_tensor(img)
-    img_tensor = TF.normalize(img_tensor, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    img_tensor = img_tensor.unsqueeze(0)  # 增加一个维度作为批次数
-
-    # 在 GPU 上进行推理，获取预测结果
-    with torch.no_grad():
-        img_tensor = img_tensor.to(device)
-        outputs = net(img_tensor)
-        _, predicted = torch.max(outputs, 1)
-
-    # 显示预测结果
-    st.write('上传的图像：')
-    st.image(img, use_column_width=True, caption=' ')
-
-    st.write('预测结果：')
-    st.write(class_names[predicted[0]])
-
-
-
-# 访问 https://www.jetbrains.com/help/pycharm/ 获取 PyCharm 帮助
+if uploaded_files is not None:
+    if len(uploaded_files) == num_images:
+        try:
+            predicted_labels = predict(uploaded_files)
+            for i, img in enumerate(uploaded_files):
+                st.image(img, caption=f"预测标签：{predicted_labels[i]}", use_column_width=True)
+        except Exception as e:
+            print(e)
+            st.write("处理图像时出错。请重试。")
+    else:
+        st.write(f"请上传恰好 {num_images} 张图片。")
