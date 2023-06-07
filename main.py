@@ -20,7 +20,7 @@ class_names = ['飞机', '汽车', '鸟', '猫', '鹿',
                '狗', '青蛙', '马', '船', '卡车']
 
 # name2label = {label_name: i for i, label_name in enumerate(label_names)}  # 将类别名称映射为类别索引
-net = models.resnet18(pretrained=True)
+net = models.resnet18(pretrained=False)
 num_ftrs = net.fc.in_features
 net.fc = nn.Linear(num_ftrs, 10)
 device = torch.device("cpu")
