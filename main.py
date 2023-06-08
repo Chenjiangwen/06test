@@ -6,22 +6,6 @@ from PIL import Image
 import torchvision.models as models
 
 
-import streamlit as st
-
-# Everything is accessible via the st.secrets dict:
-
-st.write("DB username:", st.secrets["db_username"])
-st.write("DB password:", st.secrets["db_password"])
-st.write("My cool secrets:", st.secrets["my_cool_secrets"]["things_i_like"])
-
-# And the root-level secrets are also accessible as environment variables:
-
-import os
-
-st.write(
-    "Has environment variables been set:",
-    os.environ["db_username"] == st.secrets["db_username"],
-)
 
 # 定义 CIFAR-10 数据集的类别名称
 class_names = ['飞机', '汽车', '鸟', '猫', '鹿',
