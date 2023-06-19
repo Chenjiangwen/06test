@@ -22,7 +22,7 @@ net.load_state_dict(torch.load(PATH))
 net.eval()
 net.to(device)
 
-# 创建函数来预测输入图像的标签
+# 创建函数来预测输入图像的
 def predict(images):
     predicted_labels = []
     for image in images:
