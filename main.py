@@ -43,7 +43,7 @@ def predict(images):
 # 创建 Streamlit 应用
 st.title("图像分类应用")
 st.write("上传图片，我们将尝试预测它们的类别！")
-num_images = st.select_slider('选择要上传的图片数量：', options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15，16,17,18,19,20])
+num_images = st.select_slider('选择要上传的图片数量：', options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13，14, 15，16,17,18,19,20])
 
 uploaded_files = st.file_uploader(f"选择 {num_images} 张图片...", accept_multiple_files=True)
 
