@@ -43,7 +43,7 @@ def predict(images):
 # 创建 Streamlit 应用
 st.title("图像分类应用")
 st.write("上传图片，我们将尝试预测它们的类别！")
-num_images = st.select_slider('选择要上传的图片数量：', options=[1, 2, 3,4,5,6,7,8,9,10,11,12,13,14,15])
+num_images = st.select_slider('选择要上传的图片数量：', options=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
 
 uploaded_files = st.file_uploader(f"选择 {num_images} 张图片...", accept_multiple_files=True)
 
@@ -51,11 +51,17 @@ if uploaded_files is not None:
     if len(uploaded_files) == num_images:
         try:
             predicted_labels = predict(uploaded_files)
-            for i, img in enumerate(uploaded_files):
-                st.image(img, caption=f"预测标签：{predicted_labels[i]}", width=224, use_column_width=True)
-                # 调整width参数以适应4列布局
-                if (i + 1) % 4 != 0:
-                    st.write("&nbsp;", unsafe_allow_html=True)
+            
+            # 将页面划分为4列
+            columns = st.beta_columns(4)
+            
+            for i in range(num_images):
+                img = Image.open(uploaded_files[i])
+                predicted_label = predicted_labels[i]
+                
+                # 在每一列中显示一个图像和其预测标签
+                with columns[i % 4]:
+                    st.image(img, caption=f"预测标签：{predicted_label}", use_column_width=True)
         except Exception as e:
             print(e)
             st.write("处理图像时出错。请重试。")
