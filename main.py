@@ -52,9 +52,13 @@ if uploaded_files is not None:
         try:
             predicted_labels = predict(uploaded_files)
             for i, img in enumerate(uploaded_files):
-                st.image(img, caption=f"预测标签：{predicted_labels[i]}", use_column_width=True)
+                st.image(img, caption=f"预测标签：{predicted_labels[i]}", width=224, use_column_width=True)
+                # 调整width参数以适应4列布局
+                if (i + 1) % 4 != 0:
+                    st.write("&nbsp;", unsafe_allow_html=True)
         except Exception as e:
             print(e)
             st.write("处理图像时出错。请重试。")
     else:
         st.write(f"请上传恰好 {num_images} 张图片。")
+
